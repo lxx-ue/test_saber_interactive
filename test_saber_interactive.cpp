@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <fstream>
 
 class ListNode {
 public:
@@ -13,7 +14,7 @@ public:
     ListNode* head = nullptr;
     ListNode* tail = nullptr;
     ListNode* current = nullptr;
-    
+
     int count = 0;
 
     void Serialize();
@@ -36,6 +37,19 @@ public:
         ++count;
         return node;
     }
+
+    void printFile(std::ofstream* out)
+    {
+        ListNode* node = head;
+
+
+        while (node)
+        {
+            *out << node->data;
+            *out << ' ';
+            node = node->next;
+        }
+    }
 };
 
 int main()
@@ -44,5 +58,6 @@ int main()
     list.addItem("green");
     list.addItem("orange");
     list.addItem("red");
-
+    std::ofstream fout("tt.txt");
+    list.printFile(&fout);
 }
