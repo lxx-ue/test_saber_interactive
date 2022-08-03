@@ -1,5 +1,5 @@
-green 4
-orange 4
-red 4
-black 3
-white 2
+red 3
+green 1
+blue 3
+black 0
+white 3

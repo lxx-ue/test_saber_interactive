@@ -3,14 +3,12 @@
 #include <sstream>
 #include <vector>
 #include <unordered_map>
-
 #include <time.h>
 
-class ListNode {
-public:
+struct ListNode {
 	ListNode* prev = nullptr;
 	ListNode* next = nullptr;
-	ListNode* rand = nullptr; // указатель на произвольный элемент списка
+	ListNode* rand = nullptr; 
 	std::string data;
 };
 
@@ -19,45 +17,64 @@ public:
 	ListNode* head = nullptr;
 	ListNode* tail = nullptr;
 	ListNode* current = nullptr;
-	std::vector<int> rands;
 	int count = 0;
 
 	void Serialize(std::ofstream* out)
 	{
-		std::unordered_map<ListNode*, int> m;
-		ListNode* current = head;
+		std::unordered_map<ListNode*, int> m; // map for ListNode
+		ListNode* temp = head;
 		int pos = 0;
-		while (current)
+		while (temp)
 		{
-			m.insert(std::make_pair(current, pos));
+			m.insert(std::make_pair(temp, pos)); // add to map
 			++pos;
-			current = current->next;
+			temp = temp->next;
 		}
-		current = head;
-		while (current)
+		temp = head;
+		while (temp)
 		{
-			*out << current->data << ' ';
-			if (current->rand) *out << m[current->rand];
+			*out << temp->data << ' '; // write to file
+			if (temp->rand) *out << m[temp->rand]; // random position
 			else *out << -1;
 			//*out << node->rand ? m[node->rand] : -1;
 			*out << '\n';
-			current = current->next;
+			temp = temp->next;
 		}
 	}
 
 	void Deserialize(std::ifstream* fin)
 	{
-		if (!fin->is_open())
+		if (!fin->is_open()) 
 		{
 			std::cerr << "Can't open file";
 			exit(EXIT_FAILURE);
 		}
+		std::unordered_map< int, ListNode* > m; // map for ListNode
+		int pos = 0;
+		std::vector<int> rand_num; // vector for rand positions
 		while (!fin->eof())
 		{
 			std::string s1;
 			getline(*fin, s1);
-			if(!s1.empty())
-			addItem(s1);
+			if (!s1.empty())
+			{
+				std::stringstream ssstream; // trim by stream
+				ssstream << s1;
+				std::string word; // first part of stream = data
+				int n; // first part of stream = rand number
+				ssstream >> word >> n; 
+				rand_num.push_back(n); // add num to vector 
+				m.insert(std::make_pair(pos, addItem(word))); // add node to map
+				++pos;
+			}
+		}
+		ListNode* temp = head;
+		int i = 0;
+		while (temp) // set rand positions from map according vector
+		{
+			temp->rand = m[rand_num.at(i)];
+			temp = temp->next;
+			i++;
 		}
 	}
 
@@ -81,52 +98,33 @@ public:
 
 	void setRands()
 	{
-		std::vector<ListNode*> m;
-		ListNode* node = head;
-		while (node)
+		std::vector<ListNode*> m; // vector of nodes
+		ListNode* temp = head;
+		while (temp)
 		{
-			m.push_back(node);
-			node = node->next;
+			m.push_back(temp);
+			temp = temp->next;
 		}
-		node = head;
+		temp = head;
 		int pos = 0;
-		while (node)
+		while (temp)
 		{
 			int r = rand() % count;
-			node->rand = m.at(r);
-			node = node->next;
+			temp->rand = m.at(r); // set rand by vector
+			temp = temp->next;
 			++pos;
 		}
 	}
 
 	void print()
 	{
-		ListNode* node = head;
-		while (node)
+		ListNode* temp = head;
+		std::cout << "data\taddress\t\t\tprev\t\t\tnext\t\t\trand\n\n";
+		while (temp)
 		{
-			std::cout << node->data << '\t' << node << '\t' << node->prev <<'\t'<<node->next << '\t' << node->rand << std::endl;
-			node = node->next;
+			std::cout << temp->data << '\t' << temp << '\t' << temp->prev <<'\t'<< temp->next << '\t' << temp->rand << std::endl;
+			temp = temp->next;
 		}
-		//int i = 0;
-		//while (node)
-		//{
-		//	int r = rand() % count;
-		//	std::cout << i << '\t' << node->data << '\t' << node << '\t' << r;// << std::endl;
-		//	
-		//	ListNode* hnode = head;
-		//	int j = 0;
-		//	while (hnode)
-		//	{
-
-		//		if (j == r) std::cout << ' ' << hnode << std::endl;
-		//		hnode = hnode->next;
-		//		j++;
-		//	}
-		//	
-		//	node = node->next;
-		//	++i;
-
-		//}
 	}
 };
 
@@ -135,18 +133,25 @@ int main()
 	srand(time(0));
 	ListRand list;
 	
-	list.addItem("green");
-	list.addItem("orange");
-	list.addItem("red");
-	list.addItem("black");
-	list.addItem("white");
-	std::ofstream fout("tt.txt");
+	bool serialize_mode = true; // set true to Serialize, or false to Deserialize
 
-	list.setRands();
-	list.Serialize(&fout);
-	list.print();
+	if (serialize_mode)
+	{
+		list.addItem("red");
+		list.addItem("green");
+		list.addItem("blue");
+		list.addItem("black");
+		list.addItem("white");
+		std::ofstream fout("tt.txt");
+		list.setRands();
+		list.Serialize(&fout);
+		list.print();
+	}
+	else 
+	{
+		std::ifstream fin2("tt.txt");
+		list.Deserialize(&fin2);
+		list.print();
+	}
 
-	//std::ifstream fin2("tt.txt");
-	//list.Deserialize(&fin2);
-	//list.print();
 }
