@@ -3,6 +3,8 @@
 #include <sstream>
 #include <vector>
 
+#include <time.h>
+
 class ListNode {
 public:
 	ListNode* prev = nullptr;
@@ -16,7 +18,7 @@ public:
 	ListNode* head = nullptr;
 	ListNode* tail = nullptr;
 	ListNode* current = nullptr;
-
+	std::vector<int> rands;
 	int count = 0;
 
 	void Serialize(std::ofstream* out)
@@ -24,7 +26,7 @@ public:
 		ListNode* node = head;
 		while (node)
 		{
-			*out << node->data;
+			*out << node->data << ' ' << rand() % count;
 			*out << '\n';
 			node = node->next;
 		}
@@ -64,25 +66,56 @@ public:
 		return node;
 	}
 
-	void print()
+	void setRands()
 	{
 		ListNode* node = head;
 		while (node)
 		{
-			std::cout << node->data << '\t' << node << '\t' << node->prev <<'\t'<<node->next << std::endl;
 			node = node->next;
 		}
-		std::cout << std::endl << count;
+	}
+
+	void print()
+	{
+		ListNode* node = head;
+		//while (node)
+		//{
+		//	std::cout << node->data << '\t' << node << '\t' << node->prev <<'\t'<<node->next << '\t' << node->rand << std::endl;
+		//	node = node->next;
+		//}
+		int i = 0;
+		while (node)
+		{
+			int r = rand() % count;
+			std::cout << i << '\t' << node->data << '\t' << node << '\t' << r;// << std::endl;
+			
+			ListNode* hnode = head;
+			int j = 0;
+			while (hnode)
+			{
+
+				if (j == r) std::cout << ' ' << hnode << std::endl;
+				hnode = hnode->next;
+				j++;
+			}
+			
+			node = node->next;
+			++i;
+
+		}
 	}
 };
 
-
 int main()
 {
+	srand(time(0));
 	ListRand list;
+	
 	//list.addItem("green");
 	//list.addItem("orange");
 	//list.addItem("red");
+	//list.addItem("black");
+	//list.addItem("white");
 	//std::ofstream fout("tt.txt");
 	//list.Serialize(&fout);
 
